@@ -11,6 +11,21 @@ from oauth2client.file import Storage
 from oauth2client.tools import argparser, run_flow
 import webbrowser
 
+class SingleVideo(object):
+	videoLength = ""
+	videoQuality = ""
+	titleLength = 0
+	title = ""
+	description = ""
+	descriptionLength = 0
+	def __init__(self, videoLength, videoQuality, title, description):
+		self.videoLength = videoLength
+		self.videoQuality = videoQuality
+		self.title = title
+		self.description = description
+		self.titleLength = len(self.title)
+		self.descriptionLength = len(self.description)
+
 YOUTUBE_READ_WRITE_SCOPE = "https://www.googleapis.com/auth/youtube"
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
@@ -29,39 +44,31 @@ def get_authenticated_service():
   return build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
     http=credentials.authorize(httplib2.Http()))
 
+def printVideosInfo(x):
+		print 'video title: {0}\nvideo description: {1}\nvideo quality: {2}\nvideo length: {3}'.format(x.title.encode('utf8'), x.description.encode('utf8'), x.videoQuality.encode('utf8'), x.videoLength.encode('utf8'))
+
 # @description search by keyword
 # @param:youtube authenticated object <- created by get_authenticated_service()
 # @param:keyword keyword used to search 
-def searchByKeyword(youtube, keyword):
-  search_response = youtube.search().list(q="wpi",part="id,snippet",maxResults=25).execute()
+def searchVideoById(youtube, videoId):
+	search_response = youtube.videos().list(id=videoId,part="snippet,contentDetails",maxResults=25).execute()
+	videos = []
 
-  videos = []
-  channels = []
-  playlists = []
-
-  # Add each result to the appropriate list, and then display the lists of
-  # matching videos, channels, and playlists.
-  for search_result in search_response.get("items", []):
-    if search_result["id"]["kind"] == "youtube#video":
-      videos.append("%s (%s)" % (search_result["snippet"]["title"],
-                                 search_result["id"]["videoId"]))
-    elif search_result["id"]["kind"] == "youtube#channel":
-      channels.append("%s (%s)" % (search_result["snippet"]["title"],
-                                   search_result["id"]["channelId"]))
-    elif search_result["id"]["kind"] == "youtube#playlist":
-      playlists.append("%s (%s)" % (search_result["snippet"]["title"],
-                                    search_result["id"]["playlistId"]))
-
-  print "Videos:\n", "\n".join(videos), "\n"
-  print "Channels:\n", "\n".join(channels), "\n"
-  print "Playlists:\n", "\n".join(playlists), "\n"
-
+	for search_result in search_response.get("items", []):
+			videoLength = search_result["contentDetails"]["duration"]
+			videoQuality = search_result["contentDetails"]["definition"]
+			title = search_result["snippet"]["title"]
+			description = search_result["snippet"]["description"]
+			videos.append(SingleVideo(videoLength, videoQuality, title, description))
+  # After loop, print the infomation
+  	return videos[0]
+	
 
 if __name__ == '__main__':
-  youtube = get_authenticated_service()
+	youtube = get_authenticated_service()
 	# now you can do anything you want
-
-  searchByKeyword(youtube, "wpi")
+	v = searchVideoById(youtube, "1nzHSkY4K18")
+	printVideosInfo(v)
 
 
 
