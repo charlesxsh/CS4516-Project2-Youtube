@@ -1,10 +1,9 @@
 # CS4516-Project2-Youtube
 	It's written in Python 2.7.
-	Might neet to set up some environment:
-	pip install --upgrade google-api-python-client
+	Don't neet to set up any other environment but python 2.7
 	
 # Usage
 	$ python youtube.py
-	$ input your code from callback page's url (code=.....)
+
 	
 

@@ -1,16 +1,42 @@
 #!/usr/bin/python
 
-import httplib2
-import os
-import sys
-from apiclient.discovery import build
-from apiclient.errors import HttpError
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.client import OAuth2WebServerFlow
-from oauth2client.file import Storage
-from oauth2client.tools import argparser, run_flow
-import webbrowser
+import urllib2
+import json
 
+API_KEY = "AIzaSyD77NJ22EOTmNV9WPjLQqc5wAnIAcxStcE"
+
+# search videos by using given video id prefix
+def searchVideosByPrefix(prefix):
+	json_result = urllib2.urlopen("https://www.googleapis.com/youtube/v3/search?part=id&q=%22watch?v={0}&type=video&key={1}".format(prefix,API_KEY)).read()
+	json_data = json.loads(json_result)
+	raw_videos_json = json_data["items"]
+
+	id_list = []
+
+	# get list of id which prefix is given prefix
+	for x in raw_videos_json:
+		id_list.append(x["id"]["videoId"])
+	
+	videos_list = []
+	for i in id_list:
+		videos_list.append(getDetailsById(i))
+
+	return videos_list
+
+# use video id to get more details information about that video
+def getDetailsById(vid):
+	json_result = urllib2.urlopen("https://www.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails&id={0}&key={1}".format(vid,API_KEY)).read()
+	json_data = json.loads(json_result)
+	video_json = json_data["items"][0]
+
+	videoLength = video_json["contentDetails"]["duration"]
+	videoQuality = video_json["contentDetails"]["definition"]
+	title = video_json["snippet"]["title"]
+	description = video_json["snippet"]["description"]
+
+	return SingleVideo(videoLength, videoQuality, title, description)
+
+# data structure
 class SingleVideo(object):
 	videoLength = ""
 	videoQuality = ""
@@ -26,50 +52,13 @@ class SingleVideo(object):
 		self.titleLength = len(self.title)
 		self.descriptionLength = len(self.description)
 
-YOUTUBE_READ_WRITE_SCOPE = "https://www.googleapis.com/auth/youtube"
-YOUTUBE_API_SERVICE_NAME = "youtube"
-YOUTUBE_API_VERSION = "v3"
-
-# basic authenticated request
-def get_authenticated_service():
-  flow = OAuth2WebServerFlow(client_id='227757159817-le2a2ehp21l59l1dc4thi1b7cp56vadd.apps.googleusercontent.com',
-                           client_secret='ptApzyBZZnQuEzioAOK8j3wx',
-                           scope=YOUTUBE_READ_WRITE_SCOPE,
-                           redirect_uri='http://www.google.com')
-  auth_uri = flow.step1_get_authorize_url()
-  webbrowser.open(auth_uri)
-  code = raw_input("Input your code:")
-  credentials = flow.step2_exchange(code)
-
-  return build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
-    http=credentials.authorize(httplib2.Http()))
-
+# print data structure
 def printVideosInfo(x):
 		print 'video title: {0}\nvideo description: {1}\nvideo quality: {2}\nvideo length: {3}'.format(x.title.encode('utf8'), x.description.encode('utf8'), x.videoQuality.encode('utf8'), x.videoLength.encode('utf8'))
 
-# @description search by keyword
-# @param:youtube authenticated object <- created by get_authenticated_service()
-# @param:keyword keyword used to search 
-def searchVideoById(youtube, videoId):
-	search_response = youtube.videos().list(id=videoId,part="snippet,contentDetails",maxResults=25).execute()
-	videos = []
-
-	for search_result in search_response.get("items", []):
-			videoLength = search_result["contentDetails"]["duration"]
-			videoQuality = search_result["contentDetails"]["definition"]
-			title = search_result["snippet"]["title"]
-			description = search_result["snippet"]["description"]
-			videos.append(SingleVideo(videoLength, videoQuality, title, description))
-  # After loop, print the infomation
-  	return videos[0]
-	
-
 if __name__ == '__main__':
-	youtube = get_authenticated_service()
-	# now you can do anything you want
-	v = searchVideoById(youtube, "1nzHSkY4K18")
-	printVideosInfo(v)
-
-
+	result = searchVideosByPrefix("abc")
+	for x in result:
+		printVideosInfo(x)
 
   
