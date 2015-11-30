@@ -8,6 +8,8 @@ API_KEY = "AIzaSyD77NJ22EOTmNV9WPjLQqc5wAnIAcxStcE"
 
 def filterIdByStartPrefix(prefix,list_id):
 	result = []
+	print "Here is case-sensitive result:"
+
 	for i in list_id:
 		if i.startswith(prefix):
 			result.append(i)
@@ -49,10 +51,11 @@ def getDetailsById(vid):
 	title = video_json["snippet"]["title"]
 	description = video_json["snippet"]["description"]
 	viewCount = video_json["statistics"]["viewCount"]
-	return SingleVideo(videoLength, videoQuality, title, description, viewCount)
+	return SingleVideo(vid,videoLength, videoQuality, title, description, viewCount)
 
 # data structure
 class SingleVideo(object):
+	videoId = ""
 	videoLength = ""
 	videoQuality = ""
 	titleLength = 0
@@ -60,7 +63,8 @@ class SingleVideo(object):
 	description = ""
 	descriptionLength = 0
 	viewCount = 0
-	def __init__(self, videoLength, videoQuality, title, description, viewCount):
+	def __init__(self,videoId, videoLength, videoQuality, title, description, viewCount):
+		self.videoId = videoId
 		self.videoLength = videoLength
 		self.videoQuality = videoQuality
 		self.title = title
@@ -79,9 +83,9 @@ def printVideosInfo(x):
 def writeToCSV(filename,videos_list):
 	with open(filename,"wb") as fp:
 		csvWriter = csv.writer(fp, delimiter=',')
-		data = [["video length", "view count", "title length", "description length"]];
+		data = [["video id", "video length", "view count", "title length", "description length"]];
 		for x in videos_list:
-			data.append([x.titleLength, x.viewCount, x.titleLength, x.descriptionLength])
+			data.append([x.videoId, x.titleLength, x.viewCount, x.titleLength, x.descriptionLength])
 		csvWriter.writerows(data)
 
 if __name__ == '__main__':
