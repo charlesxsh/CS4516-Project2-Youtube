@@ -8,7 +8,7 @@ API_KEY = "AIzaSyD77NJ22EOTmNV9WPjLQqc5wAnIAcxStcE"
 
 # search videos by using given video id prefix
 def searchVideosByPrefix(prefix):
-	json_result = urllib2.urlopen("https://www.googleapis.com/youtube/v3/search?part=id&q=%22watch?v={0}&type=video&key={1}".format(prefix,API_KEY)).read()
+	json_result = urllib2.urlopen("https://www.googleapis.com/youtube/v3/search?part=id&q=%22watch?v={0}&type=video&key={1}&maxResults=50".format(prefix,API_KEY)).read()
 	json_data = json.loads(json_result)
 	raw_videos_json = json_data["items"]
 
@@ -17,6 +17,7 @@ def searchVideosByPrefix(prefix):
 	# get list of id which prefix is given prefix
 	for x in raw_videos_json:
 		id_list.append(x["id"]["videoId"])
+		print x["id"]["videoId"]
 	
 	videos_list = []
 	for i in id_list:
@@ -60,7 +61,7 @@ class SingleVideo(object):
 
 def printVideosInfo(x):
 		#print 'video title: {0}\nvideo description: {1}\nvideo quality: {2}\nvideo length: {3}'.format(x.title.encode('utf8'), x.description.encode('utf8'), x.videoQuality.encode('utf8'), x.videoLength.encode('utf8'))
-		print 'video length:{0} view count:{1} title length:{2} description length:{3}'.format(x.titleLength, x.viewCount, x.titleLength, x.descriptionLength)
+		print 'video length:{0} view count:{1} title length:{2} description length:{3}'.format(x.videoLength, x.viewCount, x.titleLength, x.descriptionLength)
 
 def writeToCSV(filename,videos_list):
 	with open(filename,"wb") as fp:
@@ -71,10 +72,8 @@ def writeToCSV(filename,videos_list):
 		csvWriter.writerows(data)
 
 if __name__ == '__main__':
-	result = searchVideosByPrefix("abc")
+	result = searchVideosByPrefix("a")
 	for x in result:
 		printVideosInfo(x)
 	
-	writeToCSV("test.csv",result)
-
-  
+	writeToCSV("test.csv",result)  
