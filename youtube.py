@@ -2,6 +2,7 @@
 
 import urllib2
 import json
+import csv
 
 API_KEY = "AIzaSyD77NJ22EOTmNV9WPjLQqc5wAnIAcxStcE"
 
@@ -25,7 +26,7 @@ def searchVideosByPrefix(prefix):
 
 # use video id to get more details information about that video
 def getDetailsById(vid):
-	json_result = urllib2.urlopen("https://www.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails&id={0}&key={1}".format(vid,API_KEY)).read()
+	json_result = urllib2.urlopen("https://www.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&id={0}&key={1}".format(vid,API_KEY)).read()
 	json_data = json.loads(json_result)
 	video_json = json_data["items"][0]
 
@@ -33,8 +34,8 @@ def getDetailsById(vid):
 	videoQuality = video_json["contentDetails"]["definition"]
 	title = video_json["snippet"]["title"]
 	description = video_json["snippet"]["description"]
-
-	return SingleVideo(videoLength, videoQuality, title, description)
+	viewCount = video_json["statistics"]["viewCount"]
+	return SingleVideo(videoLength, videoQuality, title, description, viewCount)
 
 # data structure
 class SingleVideo(object):
@@ -44,21 +45,36 @@ class SingleVideo(object):
 	title = ""
 	description = ""
 	descriptionLength = 0
-	def __init__(self, videoLength, videoQuality, title, description):
+	viewCount = 0
+	def __init__(self, videoLength, videoQuality, title, description, viewCount):
 		self.videoLength = videoLength
 		self.videoQuality = videoQuality
 		self.title = title
 		self.description = description
 		self.titleLength = len(self.title)
 		self.descriptionLength = len(self.description)
+		self.viewCount = viewCount
 
 # print data structure
+# @parameter x SingleVideo
+
 def printVideosInfo(x):
-		print 'video title: {0}\nvideo description: {1}\nvideo quality: {2}\nvideo length: {3}'.format(x.title.encode('utf8'), x.description.encode('utf8'), x.videoQuality.encode('utf8'), x.videoLength.encode('utf8'))
+		#print 'video title: {0}\nvideo description: {1}\nvideo quality: {2}\nvideo length: {3}'.format(x.title.encode('utf8'), x.description.encode('utf8'), x.videoQuality.encode('utf8'), x.videoLength.encode('utf8'))
+		print 'video length:{0} view count:{1} title length:{2} description length:{3}'.format(x.titleLength, x.viewCount, x.titleLength, x.descriptionLength)
+
+def writeToCSV(filename,videos_list):
+	with open(filename,"wb") as fp:
+		csvWriter = csv.writer(fp, delimiter=',')
+		data = [["video length", "view count", "title length", "description length"]];
+		for x in videos_list:
+			data.append([x.titleLength, x.viewCount, x.titleLength, x.descriptionLength])
+		csvWriter.writerows(data)
 
 if __name__ == '__main__':
 	result = searchVideosByPrefix("abc")
 	for x in result:
 		printVideosInfo(x)
+	
+	writeToCSV("test.csv",result)
 
   
