@@ -6,9 +6,19 @@ import csv
 
 API_KEY = "AIzaSyD77NJ22EOTmNV9WPjLQqc5wAnIAcxStcE"
 
+def filterIdByStartPrefix(prefix,list_id):
+	result = []
+	for i in list_id:
+		if i.startswith(prefix):
+			result.append(i)
+			print i
+
+	return result
+
 # search videos by using given video id prefix
 def searchVideosByPrefix(prefix):
-	json_result = urllib2.urlopen("https://www.googleapis.com/youtube/v3/search?part=id&q=%22watch?v={0}&type=video&key={1}&maxResults=50".format(prefix,API_KEY)).read()
+	# q="watch?v=abc"
+	json_result = urllib2.urlopen("https://www.googleapis.com/youtube/v3/search?part=id&q=%22watch?v={0}%22&type=video&key={1}&maxResults=50".format(prefix,API_KEY)).read()
 	json_data = json.loads(json_result)
 	raw_videos_json = json_data["items"]
 
@@ -19,8 +29,11 @@ def searchVideosByPrefix(prefix):
 		id_list.append(x["id"]["videoId"])
 		print x["id"]["videoId"]
 	
+	afterFilter_id_list = filterIdByStartPrefix(prefix,id_list)
+
 	videos_list = []
-	for i in id_list:
+
+	for i in afterFilter_id_list:
 		videos_list.append(getDetailsById(i))
 
 	return videos_list
