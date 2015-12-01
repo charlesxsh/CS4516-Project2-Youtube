@@ -3,19 +3,10 @@
 import urllib2
 import json
 import csv
+import string
+import random
 
 API_KEY = "AIzaSyD77NJ22EOTmNV9WPjLQqc5wAnIAcxStcE"
-
-def filterIdByStartPrefix(prefix,list_id):
-	result = []
-	print "Here is case-sensitive result:"
-
-	for i in list_id:
-		if i.startswith(prefix):
-			result.append(i)
-			print i
-
-	return result
 
 # search videos by using given video id prefix
 def searchVideosByPrefix(prefix):
@@ -24,18 +15,43 @@ def searchVideosByPrefix(prefix):
 	json_data = json.loads(json_result)
 	raw_videos_json = json_data["items"]
 
+	#Get the next page if there is one
+	try:
+		nextPageToken = json_data["nextPageToken"]
+	except:
+		nextPageToken = None
+
 	id_list = []
 
 	# get list of id which prefix is given prefix
 	for x in raw_videos_json:
 		id_list.append(x["id"]["videoId"])
-		print x["id"]["videoId"]
-	
-	afterFilter_id_list = filterIdByStartPrefix(prefix,id_list)
+		#print x["id"]["videoId"]
+
+	#While there are additional pages to search...
+	while (nextPageToken is not None):
+		json_result = urllib2.urlopen("https://www.googleapis.com/youtube/v3/search?part=id&q=%22watch%3Fv%3D{0}%22&type=video&key={1}&maxResults=50&videoCategoryId=25&pageToken={2}".format(prefix,API_KEY, nextPageToken)).read()
+		json_data = json.loads(json_result)
+		raw_videos_json = json_data["items"]
+		try:
+			nextPageToken = json_data["nextPageToken"]
+		except:
+			nextPageToken = None
+
+		for x in raw_videos_json:
+			# Check for duplicates. API can return duplicates per page if the estimated
+			# results are too far off.
+			if (x["id"]["videoId"] not in id_list):
+				id_list.append(x["id"]["videoId"])
+				#print x["id"]["videoId"]
+
+	print "Expected Results: {0}".format(json_data["pageInfo"]["totalResults"])
+	print "Actual Results: {0}".format(len(id_list));
+	print "\n\n"
 
 	videos_list = []
 
-	for i in afterFilter_id_list:
+	for i in id_list:
 		videos_list.append(getDetailsById(i))
 
 	return videos_list
@@ -80,17 +96,55 @@ def printVideosInfo(x):
 		#print 'video title: {0}\nvideo description: {1}\nvideo quality: {2}\nvideo length: {3}'.format(x.title.encode('utf8'), x.description.encode('utf8'), x.videoQuality.encode('utf8'), x.videoLength.encode('utf8'))
 		print 'video length:{0} view count:{1} title length:{2} description length:{3}'.format(x.videoLength, x.viewCount, x.titleLength, x.descriptionLength)
 
+<<<<<<< HEAD
 def writeToCSV(filename,videos_list):
 	with open(filename,"w") as fp:
 		csvWriter = csv.writer(fp, delimiter=',')
 		data = [["video id", "video length", "view count", "title length", "description length"]];
+=======
+# Writes video information to a csv file and video titles to a separate csv file
+def writeToCSV(randPrefix, videos_list):
+	with open("video_info_file.csv","a") as video_info, open("video_title_file.csv", "a") as video_title:
+		video_info_writer = csv.writer(video_info, delimiter=',')
+		video_title_writer = csv.writer(video_title, delimiter= ',')
+		
+		#info_file_data = [["video id", "video length", "view count", "title length", "description length"]]
+		#video_file_data = [["video title"]]
+		#prefix_file_data = [["prefix"]]		
+		
+		info_file_data = [[]]
+		video_file_data = [[]]
+		
+>>>>>>> origin/master
 		for x in videos_list:
-			data.append([x.videoId, x.titleLength, x.viewCount, x.titleLength, x.descriptionLength])
-		csvWriter.writerows(data)
+			info_file_data.append([x.videoId, x.titleLength, x.videoQuality, x.viewCount, x.titleLength, x.descriptionLength])
+			video_file_data.append([x.title.encode("UTF-8")])
+			
+		video_info_writer.writerows(info_file_data)
+		video_title_writer.writerows(video_file_data)
+
+def generateRandPrefix(size=3, chars=string.ascii_letters + string.digits + '-' + '_'):
+   return ''.join(random.choice(chars) for _ in range(size))
+	
 
 if __name__ == '__main__':
-	result = searchVideosByPrefix("abc")
-	for x in result:
-		printVideosInfo(x)
+
+	prefix = open("randPrefix.csv", "a+")
+	prefix_list = prefix.read().split(",")
+	prefix_list.pop()
+	prefixSet = set()
+	print prefix_list
+
+	for i in range(0,2):
+		randPrefix = generateRandPrefix()
+		if(randPrefix not in prefix_list):
+			prefix.write(randPrefix + ",")
+		
+			prefixSet.add(randPrefix)
+			result = searchVideosByPrefix(randPrefix)
+			writeToCSV(randPrefix, result)
+		else:
+			i-=1
+		
 	
-	writeToCSV("test.csv",result)  
+	
