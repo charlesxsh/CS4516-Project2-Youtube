@@ -200,6 +200,8 @@ if __name__ == '__main__':
 				video_info_file_name = "video_info_file_{0}.csv".format(file_index)
 				video_title_file_name = "video_title_file_{0}.csv".format(file_index)
 				file_index += 1
+				rows = 0
+				
 		else:
 			i-=1
 
