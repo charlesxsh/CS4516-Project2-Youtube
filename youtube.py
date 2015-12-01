@@ -122,16 +122,22 @@ def generateRandPrefix(size=3, chars=string.ascii_letters + string.digits + '-' 
 
 if __name__ == '__main__':
 
-	prefix = open("randPrefix.csv", "a")
+	prefix = open("randPrefix.csv", "a+")
+	prefix_list = prefix.read().split(",")
+	prefix_list.pop()
 	prefixSet = set()
+	print prefix_list
 
 	for i in range(0,2):
 		randPrefix = generateRandPrefix()
-		prefix.write(randPrefix + ",")
+		if(randPrefix not in prefix_list):
+			prefix.write(randPrefix + ",")
 		
-		prefixSet.add(randPrefix)
-		result = searchVideosByPrefix(randPrefix)
-		writeToCSV(randPrefix, result)
+			prefixSet.add(randPrefix)
+			result = searchVideosByPrefix(randPrefix)
+			writeToCSV(randPrefix, result)
+		else:
+			i-=1
 		
 	
 	
