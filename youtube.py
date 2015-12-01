@@ -3,6 +3,8 @@
 import urllib2
 import json
 import csv
+import string
+import random
 
 API_KEY = "AIzaSyD77NJ22EOTmNV9WPjLQqc5wAnIAcxStcE"
 
@@ -29,11 +31,9 @@ def searchVideosByPrefix(prefix):
 		id_list.append(x["id"]["videoId"])
 		print x["id"]["videoId"]
 	
-	afterFilter_id_list = filterIdByStartPrefix(prefix,id_list)
-
 	videos_list = []
 
-	for i in afterFilter_id_list:
+	for i in id_list:
 		videos_list.append(getDetailsById(i))
 
 	return videos_list
@@ -83,9 +83,15 @@ def writeToCSV(filename,videos_list):
 		for x in videos_list:
 			data.append([x.titleLength, x.viewCount, x.titleLength, x.descriptionLength])
 		csvWriter.writerows(data)
+		
+def generateRandPrefix(size=3, chars=string.ascii_letters + string.digits + '-' + '_'):
+   return ''.join(random.choice(chars) for _ in range(size))
+
 
 if __name__ == '__main__':
-	result = searchVideosByPrefix("abc")
+	randPrefix = generateRandPrefix()
+	print "RANDOM PREFIX = " + randPrefix
+	result = searchVideosByPrefix(randPrefix)
 	for x in result:
 		printVideosInfo(x)
 	
