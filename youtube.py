@@ -15,13 +15,40 @@ def searchVideosByPrefix(prefix):
 	json_data = json.loads(json_result)
 	raw_videos_json = json_data["items"]
 
+	#Get the next page if there is one
+	try:
+		nextPageToken = json_data["nextPageToken"]
+	except:
+		nextPageToken = None
+
 	id_list = []
 
 	# get list of id which prefix is given prefix
 	for x in raw_videos_json:
 		id_list.append(x["id"]["videoId"])
 		#print x["id"]["videoId"]
-	
+
+	#While there are additional pages to search...
+	while (nextPageToken is not None):
+		json_result = urllib2.urlopen("https://www.googleapis.com/youtube/v3/search?part=id&q=%22watch%3Fv%3D{0}%22&type=video&key={1}&maxResults=50&videoCategoryId=25&pageToken={2}".format(prefix,API_KEY, nextPageToken)).read()
+		json_data = json.loads(json_result)
+		raw_videos_json = json_data["items"]
+		try:
+			nextPageToken = json_data["nextPageToken"]
+		except:
+			nextPageToken = None
+
+		for x in raw_videos_json:
+			# Check for duplicates. API can return duplicates per page if the estimated
+			# results are too far off.
+			if (x["id"]["videoId"] not in id_list):
+				id_list.append(x["id"]["videoId"])
+				#print x["id"]["videoId"]
+
+	print "Expected Results: {0}".format(json_data["pageInfo"]["totalResults"])
+	print "Actual Results: {0}".format(len(id_list));
+	print "\n\n"
+
 	videos_list = []
 
 	for i in id_list:
@@ -81,7 +108,7 @@ def writeToCSV(video_info_file, video_title_file, videos_list):
 			video_file_data.append([x.title.encode("UTF-8")])
 		video_info_writer.writerows(info_file_data)
 		video_title_writer.writerows(video_file_data)
-		
+
 def generateRandPrefix(size=3, chars=string.ascii_letters + string.digits + '-' + '_'):
    return ''.join(random.choice(chars) for _ in range(size))
 
@@ -89,8 +116,8 @@ def generateRandPrefix(size=3, chars=string.ascii_letters + string.digits + '-' 
 if __name__ == '__main__':
 	randPrefix = generateRandPrefix()
 	print "RANDOM PREFIX = " + randPrefix
-	result = searchVideosByPrefix(randPrefix)
+	result = searchVideosByPrefix("col")
 	for x in result:
 		printVideosInfo(x)
-	
+
 	writeToCSV("video_info.csv","video_title.csv", result)
