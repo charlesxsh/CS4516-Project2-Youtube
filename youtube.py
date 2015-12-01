@@ -20,7 +20,7 @@ def searchVideosByPrefix(prefix):
 	# get list of id which prefix is given prefix
 	for x in raw_videos_json:
 		id_list.append(x["id"]["videoId"])
-		print x["id"]["videoId"]
+		#print x["id"]["videoId"]
 	
 	videos_list = []
 
@@ -69,17 +69,18 @@ def printVideosInfo(x):
 		#print 'video title: {0}\nvideo description: {1}\nvideo quality: {2}\nvideo length: {3}'.format(x.title.encode('utf8'), x.description.encode('utf8'), x.videoQuality.encode('utf8'), x.videoLength.encode('utf8'))
 		print 'video length:{0} view count:{1} title length:{2} description length:{3}'.format(x.videoLength, x.viewCount, x.titleLength, x.descriptionLength)
 
-def writeToCSV(filename,videos_list):
-	with open(filename,"wb") as fp, open("video_titles.csv", "wb") as video_titles:
-		csvWriter = csv.writer(fp, delimiter=',')
-		csvWriterTitle = csv.writer(video_titles, delimiter= ',')
-		data = [["video id", "video length", "view count", "title length", "description length"]]
-		title_data = [["video title"]]
+# Writes video information to a csv file and video titles to a separate csv file
+def writeToCSV(video_info_file, video_title_file, videos_list):
+	with open(video_info_file,"wb") as video_info, open(video_title_file, "wb") as video_title:
+		video_info_writer = csv.writer(video_info, delimiter=',')
+		video_title_writer = csv.writer(video_title, delimiter= ',')
+		info_file_data = [["video id", "video length", "view count", "title length", "description length"]]
+		video_file_data = [["video title"]]
 		for x in videos_list:
-			data.append([x.videoId, x.titleLength, x.viewCount, x.titleLength, x.descriptionLength])
-			title_data.append([x.title.encode("UTF-8")])
-		csvWriter.writerows(data)
-		csvWriterTitle.writerows(title_data)
+			info_file_data.append([x.videoId, x.titleLength, x.viewCount, x.titleLength, x.descriptionLength])
+			video_file_data.append([x.title.encode("UTF-8")])
+		video_info_writer.writerows(info_file_data)
+		video_title_writer.writerows(video_file_data)
 		
 def generateRandPrefix(size=3, chars=string.ascii_letters + string.digits + '-' + '_'):
    return ''.join(random.choice(chars) for _ in range(size))
@@ -92,4 +93,4 @@ if __name__ == '__main__':
 	for x in result:
 		printVideosInfo(x)
 	
-	writeToCSV("test.csv",result)  
+	writeToCSV("video_info.csv","video_title.csv", result)
