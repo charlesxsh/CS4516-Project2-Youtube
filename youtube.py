@@ -13,8 +13,10 @@ API_KEY = "AIzaSyD77NJ22EOTmNV9WPjLQqc5wAnIAcxStcE"
 SingleVideo_list = []
 mutex = threading.Lock()
 workQueue = deque() 
-
+rows = 0
+file_index = 0
 def t_getDetailsById(vid):
+	global rows
 	json_result = urllib2.urlopen("https://www.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&id={0}&key={1}".format(vid,API_KEY)).read()
 	json_data = json.loads(json_result)
 	video_json = json_data["items"][0]
@@ -23,9 +25,9 @@ def t_getDetailsById(vid):
 	title = video_json["snippet"]["title"]
 	description = video_json["snippet"]["description"]
 	viewCount = video_json["statistics"]["viewCount"]
-	global SingleVideo_list
 	mutex.acquire()
 	SingleVideo_list.append(SingleVideo(vid,videoLength, videoQuality, title, description, viewCount))
+	rows += 1
 	mutex.release()
 
 class TgetDetailsById(threading.Thread):
@@ -34,7 +36,7 @@ class TgetDetailsById(threading.Thread):
         self.vid = vid
     def run(self):
         t_getDetailsById(self.vid)
-        print "get {0} success".format(self.vid)
+        #print "get {0} success".format(self.vid)
 
 # id_list youtube video id list
 # SingleVideo_list holds every videos details
@@ -90,13 +92,13 @@ def searchVideosByPrefix(prefix):
 	print "Actual Results: {0}".format(len(id_list));
 	print "\n\n"
 
-	videos_list = []
+	#videos_list = []
 
-	# for i in id_list:
+	#for i in id_list:
 	# 	videos_list.append(getDetailsById(i))
 	getAllDetails(id_list)
-
-	return videos_list
+	# result is in global variable SingleVideo_list
+	#return videos_list
 
 # use video id to get more details information about that video
 def getDetailsById(vid):
@@ -146,8 +148,9 @@ def printVideosInfo(x):
 # =======
 # Writes video information to a csv file and video titles to a separate csv file
 
-def writeToCSV(randPrefix, videos_list):
-	with open("video_info_file.csv","a") as video_info, open("video_title_file.csv", "a") as video_title:
+def writeToCSV(video_info_file_name,video_title_file_name, videos_list):
+
+	with open(video_info_file_name,"a") as video_info, open(video_title_file_name, "a") as video_title:
 		video_info_writer = csv.writer(video_info, delimiter=',')
 		video_title_writer = csv.writer(video_title, delimiter= ',')
 		
@@ -171,21 +174,32 @@ def generateRandPrefix(size=3, chars=string.ascii_letters + string.digits + '-' 
 
 
 if __name__ == '__main__':
-
+	global rows
+	global file_index
+	video_info_file_name = ""
+	video_title_file_name = ""
 	prefix = open("randPrefix.csv", "a+")
 	prefix_list = prefix.read().split(",")
 	prefix_list.pop()
 	prefixSet = set()
 	print prefix_list
 
-	for i in range(0,2):
+	video_info_file_name = "video_info_file_{0}.csv".format(file_index)
+	video_title_file_name = "video_title_file_{0}.csv".format(file_index)
+
+	for i in range(0,1000):
 		randPrefix = generateRandPrefix()
 		if(randPrefix not in prefix_list):
 			prefix.write(randPrefix + ",")
-		
 			prefixSet.add(randPrefix)
-			result = searchVideosByPrefix(randPrefix)
-			writeToCSV(randPrefix, result)
+			#result = searchVideosByPrefix(randPrefix)
+			#writeToCSV(randPrefix, result)
+			searchVideosByPrefix(randPrefix)
+			writeToCSV(video_info_file_name,video_title_file_name, SingleVideo_list)
+			if rows > 1000000:
+				video_info_file_name = "video_info_file_{0}.csv".format(file_index)
+				video_title_file_name = "video_title_file_{0}.csv".format(file_index)
+				file_index += 1
 		else:
 			i-=1
 
