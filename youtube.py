@@ -8,17 +8,6 @@ import random
 
 API_KEY = "AIzaSyD77NJ22EOTmNV9WPjLQqc5wAnIAcxStcE"
 
-def filterIdByStartPrefix(prefix,list_id):
-	result = []
-	print "Here is case-sensitive result:"
-
-	for i in list_id:
-		if i.startswith(prefix):
-			result.append(i)
-			print i
-
-	return result
-
 # search videos by using given video id prefix
 def searchVideosByPrefix(prefix):
 	# q="watch?v=abc"
@@ -81,12 +70,16 @@ def printVideosInfo(x):
 		print 'video length:{0} view count:{1} title length:{2} description length:{3}'.format(x.videoLength, x.viewCount, x.titleLength, x.descriptionLength)
 
 def writeToCSV(filename,videos_list):
-	with open(filename,"wb") as fp:
+	with open(filename,"wb") as fp, open("video_titles.csv", "wb") as video_titles:
 		csvWriter = csv.writer(fp, delimiter=',')
-		data = [["video id", "video length", "view count", "title length", "description length"]];
+		csvWriterTitle = csv.writer(video_titles, delimiter= ',')
+		data = [["video id", "video length", "view count", "title length", "description length"]]
+		title_data = [["video title"]]
 		for x in videos_list:
 			data.append([x.videoId, x.titleLength, x.viewCount, x.titleLength, x.descriptionLength])
+			title_data.append([x.title.encode("UTF-8")])
 		csvWriter.writerows(data)
+		csvWriterTitle.writerows(title_data)
 		
 def generateRandPrefix(size=3, chars=string.ascii_letters + string.digits + '-' + '_'):
    return ''.join(random.choice(chars) for _ in range(size))
