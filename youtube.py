@@ -8,17 +8,6 @@ import random
 
 API_KEY = "AIzaSyD77NJ22EOTmNV9WPjLQqc5wAnIAcxStcE"
 
-def filterIdByStartPrefix(prefix,list_id):
-	result = []
-	print "Here is case-sensitive result:"
-
-	for i in list_id:
-		if i.startswith(prefix):
-			result.append(i)
-			print i
-
-	return result
-
 # search videos by using given video id prefix
 def searchVideosByPrefix(prefix):
 	# q="watch?v=abc"
