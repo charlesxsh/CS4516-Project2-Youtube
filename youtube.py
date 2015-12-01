@@ -112,7 +112,7 @@ def writeToCSV(randPrefix, videos_list):
 		prefix_file_data = [[]]
 		
 		for x in videos_list:
-			info_file_data.append([x.videoId, x.titleLength, x.viewCount, x.titleLength, x.descriptionLength])
+			info_file_data.append([x.videoId, x.titleLength, x.videoQuality, x.viewCount, x.titleLength, x.descriptionLength])
 			video_file_data.append([x.title.encode("UTF-8")])
 			prefix_file_data.append([randPrefix])
 			
