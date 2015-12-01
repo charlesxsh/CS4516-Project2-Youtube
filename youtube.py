@@ -5,6 +5,7 @@ import json
 import csv
 import string
 import random
+import threading
 
 API_KEY = "AIzaSyD77NJ22EOTmNV9WPjLQqc5wAnIAcxStcE"
 
@@ -103,6 +104,7 @@ def printVideosInfo(x):
 # 		data = [["video id", "video length", "view count", "title length", "description length"]];
 # =======
 # Writes video information to a csv file and video titles to a separate csv file
+
 def writeToCSV(randPrefix, videos_list):
 	with open("video_info_file.csv","a") as video_info, open("video_title_file.csv", "a") as video_title:
 		video_info_writer = csv.writer(video_info, delimiter=',')
@@ -116,7 +118,7 @@ def writeToCSV(randPrefix, videos_list):
 		video_file_data = [["video id", "video title"]]
 		
 		for x in videos_list:
-			info_file_data.append([x.videoId, x.titleLength, x.videoQuality, x.viewCount, x.titleLength, x.descriptionLength])
+			info_file_data.append([x.videoId, x.videoLength, x.videoQuality, x.viewCount, x.titleLength, x.descriptionLength])
 			video_file_data.append([x.videoId, x.title.encode("UTF-8")])
 			
 		video_info_writer.writerows(info_file_data)
