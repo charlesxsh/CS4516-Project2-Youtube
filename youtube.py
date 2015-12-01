@@ -81,7 +81,7 @@ def printVideosInfo(x):
 		print 'video length:{0} view count:{1} title length:{2} description length:{3}'.format(x.videoLength, x.viewCount, x.titleLength, x.descriptionLength)
 
 def writeToCSV(filename,videos_list):
-	with open(filename,"wb") as fp:
+	with open(filename,"w") as fp:
 		csvWriter = csv.writer(fp, delimiter=',')
 		data = [["video id", "video length", "view count", "title length", "description length"]];
 		for x in videos_list:
