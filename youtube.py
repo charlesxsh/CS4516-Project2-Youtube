@@ -96,12 +96,12 @@ def printVideosInfo(x):
 		#print 'video title: {0}\nvideo description: {1}\nvideo quality: {2}\nvideo length: {3}'.format(x.title.encode('utf8'), x.description.encode('utf8'), x.videoQuality.encode('utf8'), x.videoLength.encode('utf8'))
 		print 'video length:{0} view count:{1} title length:{2} description length:{3}'.format(x.videoLength, x.viewCount, x.titleLength, x.descriptionLength)
 
-<<<<<<< HEAD
-def writeToCSV(filename,videos_list):
-	with open(filename,"w") as fp:
-		csvWriter = csv.writer(fp, delimiter=',')
-		data = [["video id", "video length", "view count", "title length", "description length"]];
-=======
+# <<<<<<< HEAD
+# def writeToCSV(filename,videos_list):
+# 	with open(filename,"w") as fp:
+# 		csvWriter = csv.writer(fp, delimiter=',')
+# 		data = [["video id", "video length", "view count", "title length", "description length"]];
+# =======
 # Writes video information to a csv file and video titles to a separate csv file
 def writeToCSV(randPrefix, videos_list):
 	with open("video_info_file.csv","a") as video_info, open("video_title_file.csv", "a") as video_title:
@@ -115,7 +115,6 @@ def writeToCSV(randPrefix, videos_list):
 		info_file_data = [[]]
 		video_file_data = [[]]
 		
->>>>>>> origin/master
 		for x in videos_list:
 			info_file_data.append([x.videoId, x.titleLength, x.videoQuality, x.viewCount, x.titleLength, x.descriptionLength])
 			video_file_data.append([x.title.encode("UTF-8")])
