@@ -6,8 +6,48 @@ import csv
 import string
 import random
 import threading
+from collections import deque
 
 API_KEY = "AIzaSyD77NJ22EOTmNV9WPjLQqc5wAnIAcxStcE"
+##### Thread Test
+SingleVideo_list = []
+mutex = threading.Lock()
+workQueue = deque() 
+
+def t_getDetailsById(vid):
+	json_result = urllib2.urlopen("https://www.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&id={0}&key={1}".format(vid,API_KEY)).read()
+	json_data = json.loads(json_result)
+	video_json = json_data["items"][0]
+	videoLength = video_json["contentDetails"]["duration"]
+	videoQuality = video_json["contentDetails"]["definition"]
+	title = video_json["snippet"]["title"]
+	description = video_json["snippet"]["description"]
+	viewCount = video_json["statistics"]["viewCount"]
+	global SingleVideo_list
+	mutex.acquire()
+	SingleVideo_list.append(SingleVideo(vid,videoLength, videoQuality, title, description, viewCount))
+	mutex.release()
+
+class TgetDetailsById(threading.Thread):
+    def __init__(self, vid):
+        threading.Thread.__init__(self)
+        self.vid = vid
+    def run(self):
+        t_getDetailsById(self.vid)
+        print "get {0} success".format(self.vid)
+
+# id_list youtube video id list
+# SingleVideo_list holds every videos details
+def getAllDetails(id_list):
+	for vid in id_list:
+		if len(workQueue) >= 50:
+			workQueue.popleft().join()
+		t = TgetDetailsById(vid)
+		t.start()
+		workQueue.append(t)
+
+	for x in workQueue:
+		x.join()
 
 # search videos by using given video id prefix
 def searchVideosByPrefix(prefix):
@@ -52,8 +92,9 @@ def searchVideosByPrefix(prefix):
 
 	videos_list = []
 
-	for i in id_list:
-		videos_list.append(getDetailsById(i))
+	# for i in id_list:
+	# 	videos_list.append(getDetailsById(i))
+	getAllDetails(id_list)
 
 	return videos_list
 
@@ -128,6 +169,7 @@ def generateRandPrefix(size=3, chars=string.ascii_letters + string.digits + '-' 
    return ''.join(random.choice(chars) for _ in range(size))
 	
 
+
 if __name__ == '__main__':
 
 	prefix = open("randPrefix.csv", "a+")
@@ -146,6 +188,6 @@ if __name__ == '__main__':
 			writeToCSV(randPrefix, result)
 		else:
 			i-=1
-		
-	
+
+
 	
