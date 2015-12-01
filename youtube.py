@@ -112,12 +112,12 @@ def writeToCSV(randPrefix, videos_list):
 		#video_file_data = [["video title"]]
 		#prefix_file_data = [["prefix"]]		
 		
-		info_file_data = [[]]
-		video_file_data = [[]]
+		info_file_data = [["video id", "video length", "view count", "title length", "description length"]]
+		video_file_data = [["video id", "video title"]]
 		
 		for x in videos_list:
 			info_file_data.append([x.videoId, x.titleLength, x.videoQuality, x.viewCount, x.titleLength, x.descriptionLength])
-			video_file_data.append([x.title.encode("UTF-8")])
+			video_file_data.append([x.videoId, x.title.encode("UTF-8")])
 			
 		video_info_writer.writerows(info_file_data)
 		video_title_writer.writerows(video_file_data)
