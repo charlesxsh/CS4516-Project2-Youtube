@@ -70,27 +70,42 @@ def printVideosInfo(x):
 		print 'video length:{0} view count:{1} title length:{2} description length:{3}'.format(x.videoLength, x.viewCount, x.titleLength, x.descriptionLength)
 
 # Writes video information to a csv file and video titles to a separate csv file
-def writeToCSV(video_info_file, video_title_file, videos_list):
-	with open(video_info_file,"wb") as video_info, open(video_title_file, "wb") as video_title:
+def writeToCSV(randPrefix, videos_list):
+	with open("video_info_file.csv","a") as video_info, open("video_title_file.csv", "a") as video_title, open("randPrefix.csv", "a") as prefix:
 		video_info_writer = csv.writer(video_info, delimiter=',')
 		video_title_writer = csv.writer(video_title, delimiter= ',')
-		info_file_data = [["video id", "video length", "view count", "title length", "description length"]]
-		video_file_data = [["video title"]]
+		prefix_writer = csv.writer(prefix, delimiter= ',')
+		
+		#info_file_data = [["video id", "video length", "view count", "title length", "description length"]]
+		#video_file_data = [["video title"]]
+		#prefix_file_data = [["prefix"]]		
+		
+		info_file_data = [[]]
+		video_file_data = [[]]
+		prefix_file_data = [[]]
+		
 		for x in videos_list:
 			info_file_data.append([x.videoId, x.titleLength, x.viewCount, x.titleLength, x.descriptionLength])
 			video_file_data.append([x.title.encode("UTF-8")])
+			prefix_file_data.append([randPrefix])
+			
 		video_info_writer.writerows(info_file_data)
 		video_title_writer.writerows(video_file_data)
+		prefix_writer.writerows(prefix_file_data)
 		
 def generateRandPrefix(size=3, chars=string.ascii_letters + string.digits + '-' + '_'):
    return ''.join(random.choice(chars) for _ in range(size))
-
+	
 
 if __name__ == '__main__':
-	randPrefix = generateRandPrefix()
-	print "RANDOM PREFIX = " + randPrefix
-	result = searchVideosByPrefix(randPrefix)
-	for x in result:
-		printVideosInfo(x)
+
+	prefixSet = set()
+
+	for i in range(0,2):
+		randPrefix = generateRandPrefix()
+		prefixSet.add(randPrefix)
+		result = searchVideosByPrefix(randPrefix)
+		writeToCSV(randPrefix, result)
+		
 	
-	writeToCSV("video_info.csv","video_title.csv", result)
+	
