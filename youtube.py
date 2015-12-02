@@ -7,6 +7,7 @@ import string
 import signal
 import random
 import threading
+import os.path
 from collections import deque
 
 API_KEY = "AIzaSyD77NJ22EOTmNV9WPjLQqc5wAnIAcxStcE"
@@ -181,12 +182,17 @@ if __name__ == '__main__':
 	global running
 	video_info_file_name = ""
 	video_title_file_name = ""
-	prefix = open("randPrefix.csv", "r")
-	prefix_list = prefix.read().split(",")
-	prefix_list.pop()
-	print prefix_list
 
-	prefix.close()
+	if (os.path.isfile("randPrefix.csv")):
+		prefix = open("randPrefix.csv", "r")
+		prefix_list = prefix.read().split(",")
+		prefix_list.pop()
+		print prefix_list
+
+		prefix.close()
+	else:
+		prefix_list = []
+
 	prefix = open("randPrefix.csv", "a+")
 
 	video_info_file_name = "video_info_file_{0}.csv".format(file_index)
