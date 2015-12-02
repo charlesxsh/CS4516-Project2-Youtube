@@ -184,7 +184,6 @@ if __name__ == '__main__':
 	prefix = open("randPrefix.csv", "r")
 	prefix_list = prefix.read().split(",")
 	prefix_list.pop()
-	prefixSet = set()
 	print prefix_list
 
 	prefix.close()
@@ -202,7 +201,7 @@ if __name__ == '__main__':
 		randPrefix = generateRandPrefix()
 		if(randPrefix not in prefix_list):
 			prefix.write(randPrefix + ",")
-			prefixSet.add(randPrefix)
+			prefix_list.append(randPrefix)
 			searchVideosByPrefix(randPrefix)
 			writeToCSV(video_info_file_name,video_title_file_name, SingleVideo_list)
 			del SingleVideo_list[:]
