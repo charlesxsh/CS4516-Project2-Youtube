@@ -194,9 +194,9 @@ if __name__ == '__main__':
 			writeToCSV(video_info_file_name,video_title_file_name, SingleVideo_list)
 			del SingleVideo_list[:]
 			if rows > 1000000:
+				file_index += 1
 				video_info_file_name = "video_info_file_{0}.csv".format(file_index)
 				video_title_file_name = "video_title_file_{0}.csv".format(file_index)
-				file_index += 1
 				rows = 0
 
 		else:
