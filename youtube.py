@@ -4,6 +4,7 @@ import urllib2
 import json
 import csv
 import string
+import signal
 import random
 import threading
 from collections import deque
@@ -15,6 +16,7 @@ mutex = threading.Lock()
 workQueue = deque() 
 rows = 0
 file_index = 0
+running = True
 
 def t_getDetailsById(vid):
 	global rows
@@ -168,10 +170,15 @@ def generateRandPrefix(size=3, chars=string.ascii_lowercase + string.digits + '-
    return ''.join(random.choice(chars) for _ in range(size))
 	
 
+def shutdown(signum, frame):
+	global running
+	print "Shutting down"
+	running = False;
 
 if __name__ == '__main__':
 	global rows
 	global file_index
+	global running
 	video_info_file_name = ""
 	video_title_file_name = ""
 	prefix = open("randPrefix.csv", "a+")
@@ -183,13 +190,16 @@ if __name__ == '__main__':
 	video_info_file_name = "video_info_file_{0}.csv".format(file_index)
 	video_title_file_name = "video_title_file_{0}.csv".format(file_index)
 
-	for i in range(0,1000):
+	running = True
+
+	signal.signal(signal.SIGINT, shutdown)
+	signal.signal(signal.SIGTERM, shutdown)
+
+	while running:
 		randPrefix = generateRandPrefix()
 		if(randPrefix not in prefix_list):
 			prefix.write(randPrefix + ",")
 			prefixSet.add(randPrefix)
-			#result = searchVideosByPrefix(randPrefix)
-			#writeToCSV(randPrefix, result)
 			searchVideosByPrefix(randPrefix)
 			writeToCSV(video_info_file_name,video_title_file_name, SingleVideo_list)
 			del SingleVideo_list[:]
@@ -198,9 +208,3 @@ if __name__ == '__main__':
 				video_info_file_name = "video_info_file_{0}.csv".format(file_index)
 				video_title_file_name = "video_title_file_{0}.csv".format(file_index)
 				rows = 0
-
-		else:
-			i-=1
-
-
-	
