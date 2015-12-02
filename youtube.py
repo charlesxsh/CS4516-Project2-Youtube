@@ -15,8 +15,10 @@ mutex = threading.Lock()
 workQueue = deque() 
 rows = 0
 file_index = 0
+
 def t_getDetailsById(vid):
 	global rows
+	global mutex
 	json_result = urllib2.urlopen("https://www.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&id={0}&key={1}".format(vid,API_KEY)).read()
 	json_data = json.loads(json_result)
 	video_json = json_data["items"][0]
@@ -41,6 +43,8 @@ class TgetDetailsById(threading.Thread):
 # id_list youtube video id list
 # SingleVideo_list holds every videos details
 def getAllDetails(id_list):
+	global workQueue
+	SingleVideo_list = []
 	for vid in id_list:
 		if len(workQueue) >= 50:
 			workQueue.popleft().join()
@@ -50,7 +54,7 @@ def getAllDetails(id_list):
 
 	for x in workQueue:
 		x.join()
-
+	workQueue.clear()
 # search videos by using given video id prefix
 def searchVideosByPrefix(prefix):
 	# q="watch?v=abc"
@@ -188,12 +192,13 @@ if __name__ == '__main__':
 			#writeToCSV(randPrefix, result)
 			searchVideosByPrefix(randPrefix)
 			writeToCSV(video_info_file_name,video_title_file_name, SingleVideo_list)
+			del SingleVideo_list[:]
 			if rows > 1000000:
 				video_info_file_name = "video_info_file_{0}.csv".format(file_index)
 				video_title_file_name = "video_title_file_{0}.csv".format(file_index)
 				file_index += 1
 				rows = 0
-				
+
 		else:
 			i-=1
 
