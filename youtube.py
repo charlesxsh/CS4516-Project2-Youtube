@@ -140,14 +140,6 @@ def printVideosInfo(x):
 		#print 'video title: {0}\nvideo description: {1}\nvideo quality: {2}\nvideo length: {3}'.format(x.title.encode('utf8'), x.description.encode('utf8'), x.videoQuality.encode('utf8'), x.videoLength.encode('utf8'))
 		print 'video length:{0} view count:{1} title length:{2} description length:{3}'.format(x.videoLength, x.viewCount, x.titleLength, x.descriptionLength)
 
-# <<<<<<< HEAD
-# def writeToCSV(filename,videos_list):
-# 	with open(filename,"w") as fp:
-# 		csvWriter = csv.writer(fp, delimiter=',')
-# 		data = [["video id", "video length", "view count", "title length", "description length"]];
-# =======
-# Writes video information to a csv file and video titles to a separate csv file
-
 def writeToCSV(video_info_file_name,video_title_file_name, videos_list):
 
 	with open(video_info_file_name,"a") as video_info, open(video_title_file_name, "a") as video_title:
@@ -168,7 +160,7 @@ def writeToCSV(video_info_file_name,video_title_file_name, videos_list):
 		video_info_writer.writerows(info_file_data)
 		video_title_writer.writerows(video_file_data)
 
-def generateRandPrefix(size=3, chars=string.ascii_letters + string.digits + '-' + '_'):
+def generateRandPrefix(size=3, chars=string.ascii_lowercase + string.digits + '-' + '_'):
    return ''.join(random.choice(chars) for _ in range(size))
 	
 
