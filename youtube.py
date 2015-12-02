@@ -181,11 +181,14 @@ if __name__ == '__main__':
 	global running
 	video_info_file_name = ""
 	video_title_file_name = ""
-	prefix = open("randPrefix.csv", "a+")
+	prefix = open("randPrefix.csv", "r")
 	prefix_list = prefix.read().split(",")
 	prefix_list.pop()
 	prefixSet = set()
 	print prefix_list
+
+	prefix.close()
+	prefix = open("randPrefix.csv", "a+")
 
 	video_info_file_name = "video_info_file_{0}.csv".format(file_index)
 	video_title_file_name = "video_title_file_{0}.csv".format(file_index)
