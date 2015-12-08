@@ -2,6 +2,39 @@ import csv
 import sys
 import pandas as pd
 
+# PT H M S
+def parseTimeStrToSecond(str):
+	totalTime = 0
+	temp = str[2:] # get rid of PT
+
+	tempIndexH = temp.find('H')
+	tempIndexM = temp.find('M')
+	tempIndexS = temp.find('S')
+
+	if tempIndexH != -1:
+		totalTime += int(temp[:tempIndexH])*3600
+	else:
+		tempIndexH = 0
+
+	if tempIndexM != -1:
+		if tempIndexH == 0:
+			totalTime += int(temp[:tempIndexM])*60
+		else:
+			totalTime += int(temp[tempIndexH+1:tempIndexM])*60
+	else:
+		tempIndexM = 0
+
+	if tempIndexS != -1:
+		if tempIndexM == 0:
+			if tempIndexH == 0:
+				totalTime += int(temp[:tempIndexS])
+			else:
+				totalTime += int(temp[tempIndexH+1:tempIndexS])
+		else:
+			totalTime += int(temp[tempIndexM+1:tempIndexS])
+			
+	return totalTime
+
 WordCount = {}
 
 viewCountThreshold = 1
